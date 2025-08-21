@@ -45,7 +45,7 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [
       "http://localhost:3000",
-      "http://localhost:5173",
+      "https://bellaviecle.com",
       "http://localhost:8080",
     ];
     if (!origin || allowedOrigins.includes(origin)) {
