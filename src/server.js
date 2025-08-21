@@ -29,6 +29,8 @@ connectDB();
 // CORS configuration - MUST run before any middleware that can terminate requests
 const corsOptions = {
   origin: function (origin, callback) {
+    const allowAll =
+      String(process.env.CORS_ALLOW_ALL || "").toLowerCase() === "true";
     const envOrigins = (process.env.ALLOWED_ORIGINS || "")
       .split(",")
       .map((s) => s.trim())
@@ -41,6 +43,11 @@ const corsOptions = {
           "https://bellaviecle.com",
           "https://www.bellaviecle.com",
         ];
+
+    if (allowAll) {
+      return callback(null, true);
+    }
+
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -58,6 +65,13 @@ app.options("*", cors(corsOptions));
 
 // Ensure custom request headers from clients (e.g., UploadThing) are echoed back
 app.use((req, res, next) => {
+  if (process.env.NODE_ENV !== "test") {
+    const origin = req.headers.origin || "<no-origin>";
+    const allowAll =
+      String(process.env.CORS_ALLOW_ALL || "").toLowerCase() === "true";
+    // eslint-disable-next-line no-console
+    console.debug(`[CORS] Origin: ${origin} | allowAll=${allowAll}`);
+  }
   const requestOrigin = req.headers.origin;
   if (requestOrigin) {
     res.header("Vary", "Origin");
