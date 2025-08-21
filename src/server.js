@@ -49,13 +49,25 @@ const corsOptions = {
   },
   credentials: true,
   methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
   optionsSuccessStatus: 204,
   preflightContinue: false,
 };
 
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
+
+// Ensure custom request headers from clients (e.g., UploadThing) are echoed back
+app.use((req, res, next) => {
+  const requestOrigin = req.headers.origin;
+  if (requestOrigin) {
+    res.header("Vary", "Origin");
+  }
+  const requestHeaders = req.headers["access-control-request-headers"];
+  if (requestHeaders) {
+    res.header("Access-Control-Allow-Headers", requestHeaders);
+  }
+  next();
+});
 
 // Rate limiting
 const limiter = rateLimit({
