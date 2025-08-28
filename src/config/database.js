@@ -5,17 +5,20 @@ const connectDB = async () => {
     const mongoURI =
       process.env.MONGODB_URI ||
       "mongodb+srv://kampremiumyt:CfBF6Rsm3FLwwQxy@cluster0.moaux.mongodb.net/bellavie-crm?retryWrites=true&w=majority&appName=Cluster0";
+    
+    console.log("🔗 Attempting to connect to MongoDB...");
+    console.log("🌐 Connection URI:", mongoURI.replace(/\/\/.*:.*@/, "//***:***@")); // Hide credentials in logs
 
-    // If using MongoDB Atlas, ensure we specify the database name
-    const finalMongoURI = mongoURI.includes("mongodb+srv://")
-      ? mongoURI.replace("/?", "/bellavie-crm?")
-      : mongoURI;
+    // Use the URI as-is since it already includes the database name
+    const finalMongoURI = mongoURI;
 
     const options = {
       maxPoolSize: 10, // Maintain up to 10 socket connections
-      serverSelectionTimeoutMS: 10000, // Keep trying to send operations for 10 seconds
+      serverSelectionTimeoutMS: 30000, // Increased timeout to 30 seconds
       socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
       bufferCommands: true, // Enable mongoose buffering to queue commands until connected
+      retryWrites: true,
+      w: 'majority'
     };
 
     const conn = await mongoose.connect(finalMongoURI, options);
